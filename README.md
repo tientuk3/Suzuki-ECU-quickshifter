@@ -67,6 +67,14 @@ const volatile unsigned char min_shift_tps = 0x0u;      // minimum TPS position 
    ```
    In this case, the value **FE 00 88 BD** becomes the instruction for "Branch and link to 0x5DA00". The instruction sets the PC to PC + (imm << 2) = 0x3b70c + (0x88bd << 2) = 0x5DA00, which is the correct address.
 
+   Now the call is correctly patched to point to our new functionality:
+
+   ![Disassembly diff showing the function call patch](diff.png)
+
+   The compiled shifter function residing in the ECU binary:
+
+   ![Shifter function disassembly](func.png)
+
    Now you can load the binary on the ECU!
 
 4. **Run unit tests (optional)**

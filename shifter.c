@@ -99,7 +99,7 @@ void shifter() {
         }
     }
 
-    if (shifter_status == SHIFTER_COOLDOWN) { // currently active
+    if (shifter_status == SHIFTER_COOLDOWN) { // in cooldown mode, shift not allowed
         if ((ECU_TML0_COUNTER - cooldown_time_start) > MS_TO_TICKS(cooldown_time_ms)) {
             // transition to "ready" state again
             shifter_status = SHIFTER_READY;

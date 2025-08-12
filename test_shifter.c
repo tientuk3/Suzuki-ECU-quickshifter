@@ -11,7 +11,7 @@ void reset() {
     COV3_VOLTAGE = 0xFF;
     ECU_RPM = 0;
     ECU_SELECTED_GEAR = 0;
-    ECU_IGN_LIMIT_FLAGS = 0;
+    ECU_FUEL_LIMIT_FLAGS = 0;
     ECU_TML0_COUNTER = 0;
 }
 
@@ -32,7 +32,7 @@ int main() {
     assert(shifter_status == SHIFTER_COOLDOWN);
     ECU_TML0_COUNTER += MS_TO_TICKS(cooldown_time_ms) / 2;
     shifter();
-    assert(!IGN_LIMIT_BIT);
+    assert(!FUEL_LIMIT_BIT);
     assert(shifter_status == SHIFTER_COOLDOWN);
     ECU_TML0_COUNTER += MS_TO_TICKS(cooldown_time_ms);
     shifter();
@@ -49,7 +49,7 @@ int main() {
     assert(shifter_status == SHIFTER_COOLDOWN);
     ECU_TML0_COUNTER += MS_TO_TICKS(cooldown_time_ms) / 2;
     shifter();
-    assert(!IGN_LIMIT_BIT);
+    assert(!FUEL_LIMIT_BIT);
     assert(shifter_status == SHIFTER_COOLDOWN);
     ECU_TML0_COUNTER += MS_TO_TICKS(cooldown_time_ms);
     shifter();
@@ -72,23 +72,23 @@ int main() {
     shifter();
     assert(initialized == 1);
     assert(shifter_status == SHIFTER_ACTIVE);
-    assert(IGN_LIMIT_BIT);
+    assert(FUEL_LIMIT_BIT);
     ECU_TML0_COUNTER += kill_target_duration / 2;
     shifter();
     assert(shifter_status == SHIFTER_ACTIVE);
-    assert(IGN_LIMIT_BIT);
+    assert(FUEL_LIMIT_BIT);
     ECU_TML0_COUNTER += kill_target_duration;
     shifter();
     assert(shifter_status == SHIFTER_COOLDOWN);
     ECU_TML0_COUNTER += MS_TO_TICKS(cooldown_time_ms) / 2;
-    ECU_IGN_LIMIT_FLAGS &= ~LIMIT_ENABLE_MASK;
+    ECU_FUEL_LIMIT_FLAGS &= ~LIMIT_ENABLE_MASK;
     shifter();
-    assert(!IGN_LIMIT_BIT);
+    assert(!FUEL_LIMIT_BIT);
     assert(shifter_status == SHIFTER_COOLDOWN);
     ECU_TML0_COUNTER += MS_TO_TICKS(cooldown_time_ms);
-    ECU_IGN_LIMIT_FLAGS &= ~LIMIT_ENABLE_MASK;
+    ECU_FUEL_LIMIT_FLAGS &= ~LIMIT_ENABLE_MASK;
     shifter();
-    assert(!IGN_LIMIT_BIT);
+    assert(!FUEL_LIMIT_BIT);
     assert(shifter_status == SHIFTER_READY);
 
     printf("Tests passed \n");

@@ -14,7 +14,7 @@
     #pragma ADDRESS ECU_RPM                 0x80507A
     #pragma ADDRESS ECU_TPS                 0x80508E
     #pragma ADDRESS ECU_SELECTED_GEAR       0x8050FC
-    #pragma ADDRESS ECU_IGN_LIMIT_FLAGS     0x8063E2
+    #pragma ADDRESS ECU_FUEL_LIMIT_FLAGS     0x80657F
     #pragma ADDRESS ECU_TML0_COUNTER        0x8003E0
     #pragma ADDRESS COV3_VOLTAGE            0x8050CA
 #endif
@@ -22,7 +22,7 @@
 volatile unsigned short ECU_RPM;
 volatile unsigned char ECU_TPS;
 volatile unsigned char ECU_SELECTED_GEAR;
-volatile unsigned char ECU_IGN_LIMIT_FLAGS;
+volatile unsigned char ECU_FUEL_LIMIT_FLAGS;
 volatile unsigned int ECU_TML0_COUNTER;
 volatile unsigned char COV3_VOLTAGE;
 
@@ -33,11 +33,11 @@ const volatile unsigned short min_shift_rpm = 0x1E00u;  // 3000 rpm in ECU units
 const volatile unsigned char min_shift_tps = 0x0u;      // minimum TPS position to allow shifts
 
 // Ignition limiter handling function to which the call is patched
-const unsigned int ignition_limiter_func = 0x03B7A8u;
+const unsigned int fuel_limiter_func = 0x0458ACu;
 
 #define SIGNAL_ACTIVE (COV3_VOLTAGE < 0x10u)            // true when sensor signals the ECU to shift
 #define LIMIT_ENABLE_MASK 0x3u
-#define IGN_LIMIT_BIT (ECU_IGN_LIMIT_FLAGS & LIMIT_ENABLE_MASK)
+#define FUEL_LIMIT_BIT (ECU_FUEL_LIMIT_FLAGS & LIMIT_ENABLE_MASK)
 #define SHIFTER_READY 0x1u 
 #define SHIFTER_ACTIVE 0x2u
 #define SHIFTER_COOLDOWN 0x4u
@@ -58,9 +58,9 @@ void shifter() {
     to call here instead. Now we need to call that function as the first thing, since
     the shifter operations need to happen (immediately) after it.
 
-    The reason to do this is that ignition_limiter_func does not have empty space at the end.
+    The reason to do this is that fuel_limiter_func does not have empty space at the end.
     */
-    ((void(*)(void))ignition_limiter_func)();
+    ((void(*)(void))fuel_limiter_func)();
 #endif
 
     if (initialized != 1) {
@@ -87,11 +87,11 @@ void shifter() {
     }
 
     if (shifter_status == SHIFTER_ACTIVE) { // currently active
-        ECU_IGN_LIMIT_FLAGS |= LIMIT_ENABLE_MASK;
+        ECU_FUEL_LIMIT_FLAGS |= LIMIT_ENABLE_MASK;
 
         if ((ECU_TML0_COUNTER - kill_time_start) > kill_target_duration) {
             // deactivate shifter
-            ECU_IGN_LIMIT_FLAGS &= (~LIMIT_ENABLE_MASK);
+            ECU_FUEL_LIMIT_FLAGS &= (~LIMIT_ENABLE_MASK);
             shifter_status = SHIFTER_COOLDOWN;
             kill_time_start = 0;
             kill_target_duration = 0;

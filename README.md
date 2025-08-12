@@ -20,7 +20,7 @@ The patch is installed in the original ECU firmware. It monitors the quickshifte
 - Selected gear is below 6th
 - Throttle position above minimum threshold
 
-Upon activation, it briefly cuts ignition (70ms default) to unload the transmission and allowing the shift. The patch requires quickshifter sensor hardware (available commercially). By default, it assumes that the sensor signal is active low.
+Upon activation, it briefly cuts fuel (70ms default) to unload the transmission and allowing the shift. The patch requires quickshifter sensor hardware (available commercially). By default, it assumes that the sensor signal is active low.
 
 ## How It Works
 
@@ -61,11 +61,11 @@ const volatile unsigned char min_shift_tps = 0x0u;      // minimum TPS position 
             05DA00 - 05DBCF # the "shifter" function is here
    $ srec_cat <original ecu file in> -Binary -offset 0x0 -exclude 0x5d900 0x5dbff build/shifter.mot -o <patched ecu file out> -Binary
    ```
-   Patch the call to the original ignition limiter function to call our newly created function instead. In our case:
+   Patch the call to the original fuel limiter function to call our newly created function instead. In our case:
    ```bash
-   printf '\xfe\x00\x88\xbd' | dd of=<patched ecu file from previous step> bs=1 seek=$((0x3b70c)) conv=notrunc
+   printf '\xfe\x00\x61\xdb' | dd of=<patched ecu file from previous step> bs=1 seek=$((0x45294)) conv=notrunc
    ```
-   In this case, the value **FE 00 88 BD** becomes the instruction for "Branch and link to 0x5DA00". The instruction sets the PC to PC + (imm << 2) = 0x3b70c + (0x88bd << 2) = 0x5DA00, which is the correct address.
+   In this case, the value **FE 00 61 DB** becomes the instruction for "Branch and link to 0x5DA00". The instruction sets the PC to PC + (imm << 2) = 0x45294 + (0x61db << 2) = 0x5DA00, which is the correct address.
 
    Now the call is correctly patched to point to our new functionality:
 
